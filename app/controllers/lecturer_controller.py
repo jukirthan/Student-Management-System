@@ -54,3 +54,62 @@ def _validate(data, lecturer_id=None):
         errors.append("Department is required.")
 
     return errors
+
+
+def create_lecturer():
+    data = request.get_json() or {}
+    errors = _validate(data)
+    if errors:
+        return jsonify({"errors": errors}), 400
+
+    lecturer = Lecturer(
+        first_name=str(data.get("first_name")).strip(),
+        last_name=str(data.get("last_name")).strip(),
+        email=str(data.get("email")).strip(),
+        department=str(data.get("department")).strip(),
+    )
+
+    db.session.add(lecturer)
+    db.session.commit()
+    return jsonify(lecturer.to_dict()), 201
+
+
+def get_lecturers():
+    lecturers = Lecturer.query.all()
+    return jsonify([lecturer.to_dict() for lecturer in lecturers])
+
+
+def get_lecturer(lecturer_id):
+    lecturer = Lecturer.query.get(lecturer_id)
+    if not lecturer:
+        return jsonify({"error": "Lecturer not found."}), 404
+    return jsonify(lecturer.to_dict())
+
+
+def update_lecturer(lecturer_id):
+    lecturer = Lecturer.query.get(lecturer_id)
+    if not lecturer:
+        return jsonify({"error": "Lecturer not found."}), 404
+
+    data = request.get_json() or {}
+    errors = _validate(data, lecturer_id=lecturer_id)
+    if errors:
+        return jsonify({"errors": errors}), 400
+
+    lecturer.first_name = str(data.get("first_name")).strip()
+    lecturer.last_name = str(data.get("last_name")).strip()
+    lecturer.email = str(data.get("email")).strip()
+    lecturer.department = str(data.get("department")).strip()
+
+    db.session.commit()
+    return jsonify(lecturer.to_dict())
+
+
+def delete_lecturer(lecturer_id):
+    lecturer = Lecturer.query.get(lecturer_id)
+    if not lecturer:
+        return jsonify({"error": "Lecturer not found."}), 404
+
+    db.session.delete(lecturer)
+    db.session.commit()
+    return jsonify({"message": "Lecturer deleted successfully."})
