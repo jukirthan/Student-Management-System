@@ -50,3 +50,62 @@ def _validate(data, enrollment_id=None):
         errors.append("Invalid enrollment status.")
 
     return errors
+
+
+def create_enrollment():
+    data = request.get_json() or {}
+    errors = _validate(data)
+    if errors:
+        return jsonify({"errors": errors}), 400
+
+    enrollment = Enrollment(
+        student_id=int(data.get("student_id")),
+        course_id=int(data.get("course_id")),
+        enrollment_date=datetime.strptime(data.get("enrollment_date"), "%Y-%m-%d").date(),
+        status=str(data.get("status")).capitalize(),
+    )
+
+    db.session.add(enrollment)
+    db.session.commit()
+    return jsonify(enrollment.to_dict()), 201
+
+
+def get_enrollments():
+    enrollments = Enrollment.query.all()
+    return jsonify([enrollment.to_dict() for enrollment in enrollments])
+
+
+def get_enrollment(enrollment_id):
+    enrollment = Enrollment.query.get(enrollment_id)
+    if not enrollment:
+        return jsonify({"error": "Enrollment not found."}), 404
+    return jsonify(enrollment.to_dict())
+
+
+def update_enrollment(enrollment_id):
+    enrollment = Enrollment.query.get(enrollment_id)
+    if not enrollment:
+        return jsonify({"error": "Enrollment not found."}), 404
+
+    data = request.get_json() or {}
+    errors = _validate(data, enrollment_id=enrollment_id)
+    if errors:
+        return jsonify({"errors": errors}), 400
+
+    enrollment.student_id = int(data.get("student_id"))
+    enrollment.course_id = int(data.get("course_id"))
+    enrollment.enrollment_date = datetime.strptime(data.get("enrollment_date"), "%Y-%m-%d").date()
+    enrollment.status = str(data.get("status")).capitalize()
+
+    db.session.commit()
+    return jsonify(enrollment.to_dict())
+
+
+def delete_enrollment(enrollment_id):
+    enrollment = Enrollment.query.get(enrollment_id)
+    if not enrollment:
+        return jsonify({"error": "Enrollment not found."}), 404
+
+    db.session.delete(enrollment)
+    db.session.commit()
+    return jsonify({"message": "Enrollment deleted successfully."})
