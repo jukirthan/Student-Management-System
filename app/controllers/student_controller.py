@@ -54,7 +54,7 @@ def create_student():
         return jsonify({"errors": errors}), 400
 
     student = Student(
-        full_name=data.get("first_name"),
+        first_name=data.get("first_name"),
         last_name=data.get("last_name"),
         email=data.get("email"),
         date_of_birth=datetime.strptime(data.get("date_of_birth"), "%Y-%m-%d").date(),
