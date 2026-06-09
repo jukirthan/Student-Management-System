@@ -87,7 +87,7 @@ def update_student(student_id):
     if errors:
         return jsonify({"errors": errors}), 400
 
-    student.full_name = data.get("first_name")
+    student.first_name = data.get("first_name")
     student.last_name = data.get("last_name")
     student.email = data.get("email")
     student.date_of_birth = datetime.strptime(data.get("date_of_birth"), "%Y-%m-%d").date()
