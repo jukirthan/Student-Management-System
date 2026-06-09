@@ -17,7 +17,7 @@ class Student(db.Model):
     def to_dict(self):
         return {
             "student_id": self.student_id,
-            "first_name": self.full_name,
+            "first_name": self.first_name,
             "last_name": self.last_name,
             "email": self.email,
             "date_of_birth": self.date_of_birth
